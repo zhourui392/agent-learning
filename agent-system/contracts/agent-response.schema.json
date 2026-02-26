@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AgentResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["request_id", "session_id", "success", "data", "error"],
+  "properties": {
+    "request_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "session_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "success": {
+      "type": "boolean"
+    },
+    "data": {
+      "type": ["object", "null"],
+      "additionalProperties": true
+    },
+    "error": {
+      "type": ["object", "null"],
+      "additionalProperties": true,
+      "properties": {
+        "code": {"type": "string", "minLength": 1},
+        "message": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

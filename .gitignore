@@ -1,0 +1,9 @@
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Local runtime artifacts
+agent-system/logs/*.log
+
+# OS
+.DS_Store

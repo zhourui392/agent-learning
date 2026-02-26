@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ToolNotifyPayload",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["channel", "recipient", "message"],
+  "properties": {
+    "channel": {
+      "type": "string",
+      "enum": ["email", "slack"]
+    },
+    "recipient": {
+      "type": "string",
+      "minLength": 1
+    },
+    "message": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500
+    },
+    "runtime_context": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  }
+}
