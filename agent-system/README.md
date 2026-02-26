@@ -1,5 +1,7 @@
 # Agent System W1 Baseline
 
+[![CI](https://github.com/zhourui392/agent-learning/actions/workflows/ci.yml/badge.svg)](https://github.com/zhourui392/agent-learning/actions/workflows/ci.yml)
+
 This directory contains a runnable W1 architecture baseline for a production-oriented agent backend.
 
 ## What is Included
