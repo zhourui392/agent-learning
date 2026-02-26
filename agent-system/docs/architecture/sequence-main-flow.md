@@ -1,25 +1,25 @@
-# Main Flow Sequence
+# 主流程时序
 
-## Request Path
-1. API receives AgentRequest.
-2. Validator checks request contract.
-3. Planner builds ordered plan steps.
-4. Executor runs tools via gateway.
-5. State store persists step status and snapshots.
-6. Response assembler returns AgentResponse.
-7. Audit logger records final outcome.
+## 请求路径
+1. API 接收 AgentRequest。
+2. Validator 校验请求契约。
+3. Planner 构建有序计划步骤。
+4. Executor 通过 gateway 执行工具。
+5. 状态存储持久化步骤状态与快照。
+6. 响应组装器返回 AgentResponse。
+7. 审计日志记录最终结果。
 
-## Mermaid
+## Mermaid 时序图
 ```mermaid
 sequenceDiagram
-    participant C as Client
+    participant C as 客户端
     participant A as API
     participant V as Validator
     participant P as Planner
     participant E as Executor
-    participant G as Tool Gateway
-    participant S as State Store
-    participant L as Audit Logger
+    participant G as 工具网关
+    participant S as 状态存储
+    participant L as 审计日志
 
     C->>A: AgentRequest
     A->>V: validate(request)

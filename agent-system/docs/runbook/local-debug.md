@@ -1,19 +1,19 @@
-# Local Debug Runbook
+# 本地调试运行手册
 
-## Prerequisites
-- Python 3.11+
+## 前置条件
+- Python 3.11 及以上版本。
 
-## Validate Contracts
+## 校验契约
 ```bash
 ./scripts/validate_contracts.sh
 ```
 
-## Replay Sample Session
+## 回放示例会话
 ```bash
 ./scripts/replay_session.sh
 ```
 
-## Fast Checks
-- Verify `logs/audit.log` contains request_id, session_id, step_id, tool_id.
-- Verify a failed tool returns retryable flag and error code.
-- Verify replay does not rerun completed steps when idempotency key is unchanged.
+## 快速检查
+- 确认 `logs/audit.log` 包含 request_id、session_id、step_id、tool_id。
+- 确认工具失败时会返回 retryable 标记与错误码。
+- 确认幂等键不变时，回放不会重复执行已完成步骤。

@@ -1,30 +1,30 @@
-# ADR 0001: Single-Agent First Boundary Strategy
+# ADR 0001：单智能体优先边界策略
 
-- Status: Accepted
-- Date: 2026-02-26
+- 状态：已采纳
+- 日期：2026-02-26
 
-## Context
-The project needs a production-capable baseline quickly. Multi-agent design is planned, but early expansion without governance can increase coordination and observability complexity.
+## 背景
+项目需要尽快落地可用于生产能力建设的基线。多智能体设计已规划，但若在缺乏治理前提下过早扩展，会显著增加协同与可观测性复杂度。
 
-## Decision
-Adopt a single-agent-first strategy for W1:
-- One planner/executor flow in the same runtime process.
-- Strict separation of decision, execution, and audit concerns in code structure.
-- Multi-agent interfaces are defined but not fully deployed in W1.
+## 决策
+W1 采用单智能体优先策略：
+- 在同一运行时进程内完成规划器（planner）/执行器（executor）流程。
+- 在代码结构中严格分离决策、执行、审计职责。
+- 定义多智能体接口，但 W1 不进行完整部署。
 
-## Rationale
-- Reduces moving parts while building schema governance, replay, and recovery.
-- Enables deterministic test coverage for failure and retry paths.
-- Creates stable contracts for future multi-agent migration.
+## 决策依据
+- 在构建 Schema 治理、回放与恢复能力阶段，先减少系统可变部件。
+- 支持对失败路径与重试路径开展确定性测试覆盖。
+- 为后续迁移到多智能体提供稳定契约。
 
-## Consequences
-### Positive
-- Faster path to a replayable end-to-end flow.
-- Lower integration overhead in early weeks.
+## 影响
+### 正向影响
+- 更快形成可回放的端到端主流程。
+- 降低前期集成成本。
 
-### Negative
-- Limited horizontal autonomy in W1.
-- Additional refactor needed when introducing distributed coordinators.
+### 负向影响
+- W1 阶段横向自治能力有限。
+- 引入分布式协调器时需要额外重构。
 
-## Follow-up
-- Revisit this ADR in W7 when enabling planner/executor/auditor as independent roles.
+## 后续动作
+- 在 W7 启用规划器（planner）/执行器（executor）/审计器（auditor）独立角色时，重新评审本 ADR。

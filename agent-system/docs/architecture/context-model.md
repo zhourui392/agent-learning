@@ -1,33 +1,33 @@
-# Context Model
+# 上下文模型
 
-## Layers
-- System context:
-  - tenant_id, environment, policy_version.
-- Task context:
-  - request_id, session_id, user_input, objective.
-- Tool context:
-  - current_tool, validated_payload, retry_budget.
-- Session memory:
-  - completed steps, intermediate outputs, snapshots.
+## 分层
+- 系统上下文：
+  - 关键字段：tenant_id、environment、policy_version。
+- 任务上下文：
+  - 关键字段：request_id、session_id、user_input、objective。
+- 工具上下文：
+  - 关键字段：current_tool、validated_payload、retry_budget。
+- 会话记忆：
+  - 关键字段：completed_steps、intermediate_outputs、snapshots。
 
-## Lifecycle
-1. Create context from agent request.
-2. Trim context based on tool scope and token budget.
-3. Persist execution snapshots at step boundaries.
-4. Expire stale session memory by TTL.
-5. Clean sensitive fields before logging.
+## 生命周期
+1. 从智能体请求创建上下文。
+2. 按工具作用域与 token 预算裁剪上下文。
+3. 在步骤边界持久化执行快照。
+4. 通过 TTL 过期陈旧会话记忆。
+5. 记录日志前清理敏感字段。
 
-## Traceability Rules
-Every request must preserve:
-- context_source: where each field came from.
-- trim_policy: what was removed and why.
-- redact_policy: what was masked before audit logging.
+## 可追溯规则
+每个请求必须保留：
+- context_source：每个字段的来源。
+- trim_policy：被删除内容及删除原因。
+- redact_policy：审计日志前被脱敏的字段策略。
 
-## Redaction Baseline
-- Redact: api_key, password, access_token, ssn, phone.
-- Keep: request_id, session_id, step_id, tool_id.
+## 脱敏基线
+- 脱敏字段：api_key、password、access_token、ssn、phone。
+- 保留字段：request_id、session_id、step_id、tool_id。
 
-## Token Budget Rule
-- Prefer latest 5 step summaries.
-- Drop raw tool payloads first.
-- Keep policy and identity metadata intact.
+## Token 预算规则
+- 优先保留最近 5 个步骤摘要。
+- 先丢弃原始工具 payload。
+- 保持策略与身份元数据完整。

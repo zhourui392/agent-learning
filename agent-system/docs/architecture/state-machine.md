@@ -1,39 +1,39 @@
-# State Machine and Recovery
+# 状态机与恢复
 
-## Session States
-`PENDING -> RUNNING -> WAITING_TOOL -> SUCCESS | FAILED`
+## 会话状态
+状态流转：`PENDING -> RUNNING -> WAITING_TOOL -> SUCCESS | FAILED`
 
-## Step-level State Rules
-- A step enters `RUNNING` before any tool call.
-- A step enters `WAITING_TOOL` during external execution.
-- A step moves to `SUCCESS` when a validated tool result is persisted.
-- A step moves to `FAILED` when retries are exhausted or error is non-retryable.
+## 步骤级状态规则
+- 每个步骤在调用工具前进入 `RUNNING`。
+- 每个步骤在外部执行期间进入 `WAITING_TOOL`。
+- 当通过校验的工具结果被持久化后，步骤进入 `SUCCESS`。
+- 当重试耗尽或错误不可重试时，步骤进入 `FAILED`。
 
-## Retry Model
-### Retryable examples
-- tool_timeout
-- transient_network_error
-- service_unavailable
+## 重试模型
+### 可重试示例
+- tool_timeout（工具超时）
+- transient_network_error（瞬时网络错误）
+- service_unavailable（服务不可用）
 
-### Non-retryable examples
-- schema_validation_error
-- permission_denied
-- invalid_business_input
+### 不可重试示例
+- schema_validation_error（Schema 校验失败）
+- permission_denied（权限拒绝）
+- invalid_business_input（业务输入非法）
 
-## Snapshot Strategy
-Create snapshots at:
-- pre-step execution
-- post-step success
-- final response build
+## 快照策略
+在以下时机创建快照：
+- 步骤执行前
+- 步骤成功后
+- 最终响应构建时
 
-Snapshot key:
-- session_id + step_id + snapshot_index
+快照键：
+- 组成：session_id + step_id + snapshot_index
 
-## Recovery Entry
-Recovery API accepts session_id and optional step_id.
-- If step_id is provided, recover from exact snapshot.
-- Otherwise recover from latest successful snapshot.
+## 恢复入口
+恢复 API 接收 session_id 和可选的 step_id。
+- 如果提供 step_id，则从指定快照恢复。
+- 否则从最近一次成功快照恢复。
 
-## Idempotency
-- Write tools require idempotency_key.
-- Replayed step with same idempotency_key must not duplicate side effects.
+## 幂等性
+- 写工具必须携带 idempotency_key。
+- 使用相同 idempotency_key 回放同一步骤时，不得重复产生副作用。

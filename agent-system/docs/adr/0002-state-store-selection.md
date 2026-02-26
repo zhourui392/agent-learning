@@ -1,19 +1,19 @@
-# ADR 0002: In-Memory Store for W1, Pluggable Persistent Store Later
+# ADR 0002：W1 使用内存存储，后续可插拔持久化存储
 
-- Status: Accepted
-- Date: 2026-02-26
+- 状态：已采纳
+- 日期：2026-02-26
 
-## Context
-W1 needs a fast, testable recovery baseline with minimal operational dependencies.
+## 背景
+W1 需要一个恢复能力基线：实现快、可测试、运维依赖最小。
 
-## Decision
-- Use an in-memory state store for W1 development and tests.
-- Define store and snapshot interfaces to allow Redis/PostgreSQL migration in W2+.
+## 决策
+- W1 开发与测试阶段使用内存状态存储。
+- 定义状态存储（store）与快照（snapshot）接口，支持 W2+ 迁移至 Redis/PostgreSQL。
 
-## Rationale
-- Simplifies local replay and deterministic tests.
-- Avoids early infrastructure lock-in.
+## 决策依据
+- 简化本地回放与确定性测试。
+- 避免过早被基础设施绑定。
 
-## Consequences
-- State is not durable across process restarts in W1.
-- Production rollout requires persistent backend integration.
+## 影响
+- W1 阶段状态在进程重启后不具备持久性。
+- 生产发布前必须集成持久化后端。

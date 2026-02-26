@@ -1,13 +1,13 @@
-# W1 Review Notes (Template)
+# W1 评审记录（模板）
 
-## Keep
-- Pending review.
+## 保留项
+- 待评审。
 
-## Fix
-- Pending review.
+## 修复项
+- 待评审。
 
-## Defer
-- Pending review.
+## 延后项
+- 待评审。
 
-## W2 Blockers
-- None identified yet.
+## W2 阻塞项
+- 暂无。

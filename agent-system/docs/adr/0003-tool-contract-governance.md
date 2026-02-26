@@ -1,25 +1,25 @@
-# ADR 0003: Tool Contract Governance by JSON Schema
+# ADR 0003：基于 JSON Schema 的工具契约治理
 
-- Status: Accepted
-- Date: 2026-02-26
+- 状态：已采纳
+- 日期：2026-02-26
 
-## Context
-Tool calls are the highest-risk boundary in agent execution. Missing validation causes unstable behavior and poor debuggability.
+## 背景
+工具调用是智能体执行过程中风险最高的边界。缺失校验会导致行为不稳定，并显著降低可调试性。
 
-## Decision
-- Every tool request payload must pass JSON Schema validation before execution.
-- Every tool response must use a normalized envelope:
-  - success
-  - data
-  - error
-  - retryable
-- Tool invocation requires policy authorization.
+## 决策
+- 每个工具请求负载（payload）在执行前必须通过 JSON Schema 校验。
+- 每个工具响应必须使用统一封装结构：
+  - success（是否成功）
+  - data（结果数据）
+  - error（错误信息）
+  - retryable（是否可重试）
+- 工具调用必须经过策略授权。
 
-## Rationale
-- Enforces deterministic boundaries.
-- Enables contract tests and consistent error handling.
-- Improves auditability and replay quality.
+## 决策依据
+- 强化确定性边界。
+- 支持契约测试与一致的错误处理。
+- 提升可审计性与回放质量。
 
-## Consequences
-- All new tools need schema and test fixtures.
-- Schema evolution must be versioned and backward compatibility reviewed.
+## 影响
+- 所有新工具都需要提供 schema 与测试夹具。
+- Schema 演进必须进行版本管理并评审向后兼容性。

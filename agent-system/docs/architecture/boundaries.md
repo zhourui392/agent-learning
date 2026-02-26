@@ -1,55 +1,55 @@
-# Agent Boundary Baseline
+# 智能体边界基线
 
-## Scope
-This document defines a production-oriented baseline for single-agent and multi-agent responsibilities.
+## 范围
+本文定义了面向生产的单智能体与多智能体职责基线。
 
-## Core Scenarios
-### Scenario A: High Frequency - Customer FAQ Lookup
-- Input: user question, locale, tenant_id.
-- Output: concise answer with source snippets.
-- Failure path: retrieval timeout or empty recall.
-- Human handoff: route to support queue when confidence < 0.6.
+## 核心场景
+### 场景 A：高频场景 - 客户常见问题（FAQ）检索
+- 输入：用户问题、locale、tenant_id。
+- 输出：带来源片段的简洁回答。
+- 失败路径：检索超时或召回为空。
+- 人工接管：当置信度 < 0.6 时转入客服队列。
 
-### Scenario B: High Complexity - Multi-step Data Analysis
-- Input: analysis prompt, metric definitions, time range.
-- Output: aggregated result, assumptions, and confidence.
-- Failure path: intermediate tool failure or inconsistent data.
-- Human handoff: reviewer validates generated SQL and summary.
+### 场景 B：高复杂场景 - 多步骤数据分析
+- 输入：分析需求、指标定义、时间范围。
+- 输出：聚合结果、前置假设与置信度。
+- 失败路径：中间工具失败或数据不一致。
+- 人工接管：由评审者校验生成 SQL 与分析摘要。
 
-### Scenario C: High Cost of Failure - Notification Automation
-- Input: notification intent, recipients, approval_token.
-- Output: send status and audit_id.
-- Failure path: permission deny, duplicate send, channel outage.
-- Human handoff: manual approval and resend decision.
+### 场景 C：高失败成本场景 - 通知自动化
+- 输入：通知意图、接收人、approval_token。
+- 输出：发送状态与 audit_id。
+- 失败路径：权限拒绝、重复发送、通道故障。
+- 人工接管：人工审批并决定是否重发。
 
-## Responsibility Boundaries
-### Single Agent (Default)
-- Owns intent parsing, plan generation, tool invocation, and result synthesis.
-- Operates within strict tool policy and contract validation.
-- Writes full audit trail for each plan step.
+## 职责边界
+### 单智能体（默认）
+- 负责意图解析、计划生成、工具调用与结果汇总。
+- 在严格工具策略与契约校验下执行。
+- 为每个计划步骤写入完整审计轨迹。
 
-### Multi Agent (Future)
-- Planner Agent: decomposes task and dependency graph.
-- Executor Agent: performs tool calls and reports structured outcomes.
-- Auditor Agent: verifies policy, schema, and risk thresholds.
-- Coordinator: resolves conflicts and merges final response.
+### 多智能体（未来）
+- 规划智能体（Planner Agent）：拆解任务并构建依赖图。
+- 执行智能体（Executor Agent）：执行工具调用并上报结构化结果。
+- 审计智能体（Auditor Agent）：校验策略、Schema 与风险阈值。
+- 协调器（Coordinator）：处理冲突并合并最终响应。
 
-## Decision / Execution / Audit Separation
-- Decision owner: planner role.
-- Execution owner: executor role.
-- Audit owner: gateway + audit logger.
+## 决策 / 执行 / 审计 分离
+- 决策责任人：planner 角色。
+- 执行责任人：executor 角色。
+- 审计责任人：gateway + audit logger（审计日志器）。
 
-## Non-functional Targets (W1 Baseline)
-- SLO:
-  - E2E success rate >= 95% on smoke set.
-  - P95 latency <= 8s for single-tool flow.
-- Cost ceiling:
-  - Average tool calls per request <= 3.
-  - Average token budget <= 8k per request.
-- Minimum observability:
-  - Mandatory fields: request_id, session_id, step_id, tool_id, duration_ms, result_status.
+## 非功能性目标（W1 基线）
+- 服务级目标（SLO）：
+  - 在冒烟用例集上端到端成功率 >= 95%。
+  - 单工具流程 P95 延迟 <= 8s。
+- 成本上限：
+  - 平均每请求工具调用次数 <= 3。
+  - 平均每请求 token 预算 <= 8k。
+- 最低可观测性要求：
+  - 必填字段：request_id、session_id、step_id、tool_id、duration_ms、result_status。
 
-## Risk Controls
-- Reject any tool call without schema validation.
-- Stop execution on non-retryable errors.
-- Require explicit idempotency key for write actions.
+## 风险控制
+- 拒绝所有未通过 Schema 校验的工具调用。
+- 出现不可重试错误时立即停止执行。
+- 写操作必须显式携带幂等键。
