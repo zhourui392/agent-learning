@@ -14,9 +14,11 @@ from pathlib import Path
 from typing import Any, Dict, Mapping
 
 from src.agent.context import ContextManager
+from src.agent.execution_context import ExecutionControl
 from src.agent.executor import Executor
 from src.agent.planner import Planner
 from src.agent.policy import ToolPolicyEngine
+from src.agent.replanner import Replanner
 from src.gateway.audit_logger import AuditLogger
 from src.gateway.tool_registry import ToolDefinition, ToolExecutionError, ToolRegistry
 from src.gateway.validator import ContractValidationError, ContractValidator
@@ -27,7 +29,7 @@ from src.state.store import InMemoryStateStore
 
 class AgentApplication:
     """
-    Composes planner, executor, gateway, and state store.
+    Composes planner, executor, replanner, gateway, and state store.
 
     @author zhourui(V33215020)
     @since 2026/02/26
@@ -50,6 +52,7 @@ class AgentApplication:
         self._state_store = InMemoryStateStore()
         self._snapshot_manager = SnapshotManager()
         self._recovery_service = RecoveryService()
+        self._replanner = Replanner()
 
         self._audit_logger = AuditLogger(log_file=project_root / "logs" / "audit.log")
         self._executor = Executor(
@@ -61,8 +64,11 @@ class AgentApplication:
             policy_engine=self._policy_engine,
             context_manager=self._context_manager,
             audit_logger=self._audit_logger,
+            replanner=self._replanner,
             max_retry_attempts=1,
+            max_replan_attempts=1,
         )
+        self._tool_behavior_counters: Dict[str, int] = {}
         self._register_tools()
 
     def handle_request(self, request_payload: Mapping[str, Any]) -> Dict[str, Any]:
@@ -77,19 +83,45 @@ class AgentApplication:
 
         context = self._context_manager.build(request_payload)
         plan = self._planner.create_plan(request_payload)
+        execution_control = ExecutionControl.from_request(request_payload)
 
         self._state_store.init_session(
             request_id=plan.request_id,
             session_id=plan.session_id,
-            steps=[{"step_id": step.step_id, "tool_id": step.tool_id} for step in plan.steps],
+            trace_id=plan.trace_id,
+            plan_version=plan.plan_version,
+            steps=[
+                {
+                    "step_id": step.step_id,
+                    "tool_id": step.tool_id,
+                    "goal": step.goal,
+                    "depends_on": list(step.depends_on),
+                }
+                for step in plan.steps
+            ],
         )
 
-        execution_result = self._executor.execute(plan=plan, request=request_payload, context=context)
+        execution_result = self._executor.execute(
+            plan=plan,
+            request=request_payload,
+            context=context,
+            control=execution_control,
+        )
         response_payload = {
             "request_id": plan.request_id,
             "session_id": plan.session_id,
             "success": execution_result.success,
-            "data": {"step_results": execution_result.step_results} if execution_result.success else None,
+            "data": (
+                {
+                    "trace_id": execution_result.trace_id,
+                    "plan_version": execution_result.plan_version,
+                    "risk_flags": list(plan.risk_flags),
+                    "replan_history": execution_result.replan_history,
+                    "step_results": execution_result.step_results,
+                }
+                if execution_result.success
+                else None
+            ),
             "error": execution_result.error,
         }
 
@@ -148,9 +180,33 @@ class AgentApplication:
         @param payload: Validated search payload.
         @return: Search result payload.
         """
-        query = str(payload.get("query", "")).lower()
+        query = str(payload.get("query", "")).strip().lower()
+        if "sleep_short" in query:
+            time.sleep(1.5)
+
         if "timeout" in query:
             raise ToolExecutionError(code="tool_timeout", message="search timeout", retryable=True)
+
+        if "flaky_once" in query and self._should_fail_once(f"search:{query}"):
+            raise ToolExecutionError(
+                code="transient_network_error",
+                message="temporary search failure",
+                retryable=True,
+            )
+
+        if "flaky_twice" in query and self._should_fail_twice(f"search:{query}"):
+            raise ToolExecutionError(
+                code="service_unavailable",
+                message="temporary upstream outage",
+                retryable=True,
+            )
+
+        if "force_fail" in query:
+            raise ToolExecutionError(
+                code="invalid_business_input",
+                message="search input is invalid",
+                retryable=False,
+            )
 
         return {
             "query": payload.get("query"),
@@ -171,6 +227,13 @@ class AgentApplication:
         if not sql.startswith("select"):
             raise ToolExecutionError(code="invalid_business_input", message="only SELECT is allowed", retryable=False)
 
+        if "transient_fail_once" in sql and self._should_fail_once(f"query:{sql}"):
+            raise ToolExecutionError(
+                code="service_unavailable",
+                message="db service unavailable",
+                retryable=True,
+            )
+
         return {"rows": [{"ok": 1}], "row_count": 1, "limit": payload.get("limit", 10)}
 
     def _tool_notify(self, payload: Mapping[str, Any]) -> Dict[str, Any]:
@@ -184,11 +247,40 @@ class AgentApplication:
         if len(message) > 500:
             raise ToolExecutionError(code="invalid_business_input", message="message too long", retryable=False)
 
+        if "handoff" in message.lower():
+            raise ToolExecutionError(
+                code="permission_denied",
+                message="manual approval required",
+                retryable=False,
+            )
+
         return {
             "channel": payload.get("channel"),
             "recipient": payload.get("recipient"),
             "status": "queued",
         }
+
+    def _should_fail_once(self, key: str) -> bool:
+        """
+        Return True on first call for a key and False afterwards.
+
+        @param key: Behavior key.
+        @return: Boolean flag for first-call failure.
+        """
+        current = self._tool_behavior_counters.get(key, 0)
+        self._tool_behavior_counters[key] = current + 1
+        return current == 0
+
+    def _should_fail_twice(self, key: str) -> bool:
+        """
+        Return True on first two calls for a key and False afterwards.
+
+        @param key: Behavior key.
+        @return: Boolean flag for two-call failure window.
+        """
+        current = self._tool_behavior_counters.get(key, 0)
+        self._tool_behavior_counters[key] = current + 1
+        return current < 2
 
 
 def _read_json_file(file_path: Path) -> Dict[str, Any]:

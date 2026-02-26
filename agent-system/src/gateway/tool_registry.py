@@ -114,6 +114,13 @@ class ToolRegistry:
                 "error": {"code": error.code, "message": error.message},
                 "retryable": error.retryable,
             }
+        except Exception as error:  # pragma: no cover - defensive fallback for unknown handlers
+            return {
+                "success": False,
+                "data": None,
+                "error": {"code": "tool_runtime_exception", "message": str(error)},
+                "retryable": False,
+            }
 
     def _get(self, tool_id: str) -> ToolDefinition:
         """
