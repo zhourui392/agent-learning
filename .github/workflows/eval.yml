@@ -1,0 +1,55 @@
+name: Eval Gate
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  eval-gate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run eval tests
+        run: python -m unittest discover -s tests/eval
+
+      - name: Run smoke evaluation
+        run: >-
+          python -m eval.runner
+          --dataset eval/datasets/smoke.jsonl
+          --output-dir eval/results/ci-smoke
+
+      - name: Compare with W5 baseline
+        run: >-
+          python -m eval.diff
+          --baseline eval/baseline/w5-baseline.json
+          --current eval/results/ci-smoke/summary.json
+          --output eval/results/ci-smoke/diff-report.md
+
+      - name: Upload eval artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-ci-smoke
+          path: |
+            eval/results/ci-smoke/alerts.json
+            eval/results/ci-smoke/alert-report.md
+            eval/results/ci-smoke/dashboard-snapshot.json
+            eval/results/ci-smoke/error-topn.md
+            eval/results/ci-smoke/summary.json
+            eval/results/ci-smoke/report.md
+            eval/results/ci-smoke/diff-report.md
+            eval/results/ci-smoke/failed-cases.jsonl
+            eval/results/ci-smoke/incident-drill.md
+            eval/results/ci-smoke/latency-breakdown.md
+            eval/results/ci-smoke/logs.jsonl
+            eval/results/ci-smoke/traces.jsonl

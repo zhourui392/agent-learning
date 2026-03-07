@@ -1,0 +1,93 @@
+# Tool Gateway Error Codes
+# Format: CODE -> (HTTP-like status, category, message template)
+
+errors:
+  # Validation errors (1xxx)
+  INVALID_TOOL_NAME:
+    code: 1001
+    category: validation
+    message: "Tool '{tool_name}' is not registered."
+
+  TOOL_NOT_AVAILABLE:
+    code: 1002
+    category: validation
+    message: "Tool '{tool_name}' is not in AVAILABLE state (current: {status})."
+
+  SCHEMA_VIOLATION:
+    code: 1003
+    category: validation
+    message: "Input validation failed: {details}"
+
+  MISSING_REQUIRED_FIELD:
+    code: 1004
+    category: validation
+    message: "Missing required field: {field_name}"
+
+  INVALID_FIELD_TYPE:
+    code: 1005
+    category: validation
+    message: "Field '{field_name}' expected type '{expected}', got '{actual}'."
+
+  # Quota errors (2xxx)
+  QPS_EXCEEDED:
+    code: 2001
+    category: quota
+    message: "QPS limit exceeded for tool '{tool_name}' (limit: {limit}/s)."
+
+  CONCURRENCY_EXCEEDED:
+    code: 2002
+    category: quota
+    message: "Concurrency limit exceeded for tool '{tool_name}' (limit: {limit})."
+
+  DAILY_QUOTA_EXCEEDED:
+    code: 2003
+    category: quota
+    message: "Daily quota exceeded for tool '{tool_name}' (limit: {limit}/day)."
+
+  # Auth errors (3xxx)
+  UNAUTHORIZED:
+    code: 3001
+    category: auth
+    message: "Caller '{caller}' lacks required role for tool '{tool_name}'."
+
+  SENSITIVE_TOOL_UNCONFIRMED:
+    code: 3002
+    category: auth
+    message: "Tool '{tool_name}' is sensitive and requires explicit confirmation."
+
+  TENANT_DENIED:
+    code: 3003
+    category: auth
+    message: "Tenant '{tenant}' is not authorized to use tool '{tool_name}'."
+
+  # Runtime errors (4xxx)
+  TOOL_TIMEOUT:
+    code: 4001
+    category: runtime
+    message: "Tool '{tool_name}' timed out after {timeout}s."
+
+  CIRCUIT_OPEN:
+    code: 4002
+    category: runtime
+    message: "Circuit breaker open for tool '{tool_name}'. Try again later."
+
+  TOOL_EXECUTION_ERROR:
+    code: 4003
+    category: runtime
+    message: "Tool '{tool_name}' execution failed: {details}"
+
+  RATE_LIMITED:
+    code: 4004
+    category: runtime
+    message: "Rate limited for caller '{caller}'. Retry after {retry_after}s."
+
+  # Degradation (5xxx)
+  DEGRADED_RESPONSE:
+    code: 5001
+    category: degradation
+    message: "Tool '{tool_name}' returned a degraded response: {strategy}."
+
+  FALLBACK_USED:
+    code: 5002
+    category: degradation
+    message: "Fallback tool '{fallback}' used instead of '{tool_name}'."

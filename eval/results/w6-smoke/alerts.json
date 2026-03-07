@@ -1,0 +1,52 @@
+[
+  {
+    "name": "low_e2e_success_rate",
+    "severity": "P1",
+    "status": "ok",
+    "metric": "e2e_success_rate",
+    "actual_value": 0.8,
+    "threshold": 0.75,
+    "route": "oncall+owner+war-room",
+    "description": "E2E success rate drops below SLO."
+  },
+  {
+    "name": "high_p95_latency",
+    "severity": "P2",
+    "status": "ok",
+    "metric": "p95_latency_ms",
+    "actual_value": 3.210800001397729,
+    "threshold": 7.5,
+    "route": "owner+team-channel",
+    "description": "P95 latency exceeds smoke baseline tolerance."
+  },
+  {
+    "name": "tool_execution_failures",
+    "severity": "P1",
+    "status": "ok",
+    "metric": "failure_buckets.tool_execution_failed",
+    "actual_value": 0.0,
+    "threshold": 1.0,
+    "route": "oncall+owner+war-room",
+    "description": "Tool execution failures detected."
+  },
+  {
+    "name": "rate_limited_burst",
+    "severity": "P2",
+    "status": "ok",
+    "metric": "failure_buckets.rate_limited",
+    "actual_value": 0.0,
+    "threshold": 5.0,
+    "route": "owner+team-channel",
+    "description": "Rate limited events exceed expected noise level."
+  },
+  {
+    "name": "token_cost_spike",
+    "severity": "P2",
+    "status": "ok",
+    "metric": "cost.total_tokens",
+    "actual_value": 183.0,
+    "threshold": 240.0,
+    "route": "owner+team-channel",
+    "description": "Token cost exceeds smoke control threshold."
+  }
+]

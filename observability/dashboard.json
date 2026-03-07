@@ -1,0 +1,29 @@
+{
+  "title": "Agent System W6 Dashboard",
+  "panels": [
+    {
+      "id": "success-rate",
+      "title": "E2E Success Rate",
+      "metric": "e2e_success_rate",
+      "group_by": ["dataset_name", "scenario"]
+    },
+    {
+      "id": "latency-p95",
+      "title": "P95 Latency",
+      "metric": "p95_latency_ms",
+      "group_by": ["component", "tool_name"]
+    },
+    {
+      "id": "error-rate",
+      "title": "Error Rate",
+      "metric": "failure_buckets",
+      "group_by": ["error_code", "category"]
+    },
+    {
+      "id": "cost",
+      "title": "Token Cost",
+      "metric": "cost.total_tokens",
+      "group_by": ["dataset_name"]
+    }
+  ]
+}

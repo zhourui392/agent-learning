@@ -1,0 +1,72 @@
+{
+  "dataset_name": "smoke.jsonl",
+  "summary": {
+    "e2e_success_rate": 0.8,
+    "accuracy": 0.6,
+    "avg_answer_f1": 0.7809620596205963,
+    "avg_latency_ms": 0.7746000192128122,
+    "p95_latency_ms": 3.210800001397729,
+    "total_tokens": 183
+  },
+  "breakdowns": {
+    "failure_buckets": {
+      "quality_regression": 1
+    },
+    "by_category": {
+      "factual": {
+        "count": 2.0,
+        "e2e_success_rate": 0.5,
+        "avg_answer_f1": 0.5149051490514905,
+        "avg_recall_at_5": 1.0,
+        "avg_mrr": 1.0,
+        "avg_latency_ms": 1.7100000113714486
+      },
+      "procedural": {
+        "count": 1.0,
+        "e2e_success_rate": 1.0,
+        "avg_answer_f1": 0.8750000000000001,
+        "avg_recall_at_5": 1.0,
+        "avg_mrr": 1.0,
+        "avg_latency_ms": 0.1713000237941742
+      },
+      "negative": {
+        "count": 1.0,
+        "e2e_success_rate": 1.0,
+        "avg_answer_f1": 1.0,
+        "avg_recall_at_5": 1.0,
+        "avg_mrr": 1.0,
+        "avg_latency_ms": 0.15000003622844815
+      },
+      "gateway": {
+        "count": 1.0,
+        "e2e_success_rate": 1.0,
+        "avg_answer_f1": 1.0,
+        "avg_recall_at_5": 0.0,
+        "avg_mrr": 0.0,
+        "avg_latency_ms": 0.1317000132985413
+      }
+    },
+    "by_difficulty": {
+      "easy": {
+        "count": 4.0,
+        "e2e_success_rate": 0.75,
+        "avg_answer_f1": 0.7574525745257452,
+        "avg_recall_at_5": 0.75,
+        "avg_mrr": 0.75,
+        "avg_latency_ms": 0.9254250180674717
+      },
+      "medium": {
+        "count": 1.0,
+        "e2e_success_rate": 1.0,
+        "avg_answer_f1": 0.8750000000000001,
+        "avg_recall_at_5": 1.0,
+        "avg_mrr": 1.0,
+        "avg_latency_ms": 0.1713000237941742
+      }
+    }
+  },
+  "alerts": {
+    "firing_count": 0,
+    "firing": []
+  }
+}

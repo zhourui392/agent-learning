@@ -1,0 +1,264 @@
+{
+  "dataset_name": "smoke.jsonl",
+  "total_samples": 5,
+  "e2e_success_rate": 0.8,
+  "step_success_rates": {
+    "authorization": 1.0,
+    "compression": 1.0,
+    "execution": 1.0,
+    "rate_limit": 1.0,
+    "rerank": 1.0,
+    "retrieval": 1.0,
+    "validation": 1.0
+  },
+  "p95_latency_ms": 1.2462999729905277,
+  "avg_latency_ms": 0.3602400072850287,
+  "avg_recall_at_5": 0.8,
+  "avg_recall_at_10": 0.8,
+  "avg_mrr": 0.8,
+  "avg_answer_f1": 0.7809620596205963,
+  "accuracy": 0.6,
+  "consistency_std": 0.22640687003388382,
+  "stability": 1.0,
+  "validation_rejection_rate": 0.0,
+  "auth_denial_rate": 0.0,
+  "circuit_open_frequency": 0.0,
+  "audit_completeness": 1.0,
+  "cost": {
+    "total_tokens": 183,
+    "tool_calls": 1,
+    "retrieval_calls": 4
+  },
+  "failure_buckets": {
+    "quality_regression": 1
+  },
+  "by_category": {
+    "factual": {
+      "count": 2.0,
+      "e2e_success_rate": 0.5,
+      "avg_answer_f1": 0.5149051490514905,
+      "avg_recall_at_5": 1.0,
+      "avg_mrr": 1.0,
+      "avg_latency_ms": 0.7046499958960339
+    },
+    "procedural": {
+      "count": 1.0,
+      "e2e_success_rate": 1.0,
+      "avg_answer_f1": 0.8750000000000001,
+      "avg_recall_at_5": 1.0,
+      "avg_mrr": 1.0,
+      "avg_latency_ms": 0.1375000283587724
+    },
+    "negative": {
+      "count": 1.0,
+      "e2e_success_rate": 1.0,
+      "avg_answer_f1": 1.0,
+      "avg_recall_at_5": 1.0,
+      "avg_mrr": 1.0,
+      "avg_latency_ms": 0.1230000052601099
+    },
+    "gateway": {
+      "count": 1.0,
+      "e2e_success_rate": 1.0,
+      "avg_answer_f1": 1.0,
+      "avg_recall_at_5": 0.0,
+      "avg_mrr": 0.0,
+      "avg_latency_ms": 0.1314000110141933
+    }
+  },
+  "by_difficulty": {
+    "easy": {
+      "count": 4.0,
+      "e2e_success_rate": 0.75,
+      "avg_answer_f1": 0.7574525745257452,
+      "avg_recall_at_5": 0.75,
+      "avg_mrr": 0.75,
+      "avg_latency_ms": 0.41592500201659277
+    },
+    "medium": {
+      "count": 1.0,
+      "e2e_success_rate": 1.0,
+      "avg_answer_f1": 0.8750000000000001,
+      "avg_recall_at_5": 1.0,
+      "avg_mrr": 1.0,
+      "avg_latency_ms": 0.1375000283587724
+    }
+  },
+  "details": [
+    {
+      "sample_id": "smoke_001",
+      "category": "factual",
+      "difficulty": "easy",
+      "success": false,
+      "answer": "退款政策规定退款有效期为30天，超过30天不予退款。用户需在购买后30天内提出退款申请。",
+      "expected_answer": "退款有效期为30天",
+      "answer_f1": 0.4444444444444445,
+      "latency_ms": 1.2462999729905277,
+      "trace_id": "trace-smoke_001",
+      "session_id": "sess-smoke_001",
+      "retrieved_source_ids": [
+        "doc_refund_policy",
+        "doc_merchant_onboard",
+        "doc_coupon_rules",
+        "doc_verification",
+        "doc_settlement"
+      ],
+      "recall_at_5": 1.0,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "error_code": null,
+      "step_outcomes": {
+        "retrieval": true,
+        "rerank": true,
+        "compression": true
+      },
+      "validation_rejected": false,
+      "auth_denied": false,
+      "circuit_opened": false,
+      "audit_entries": 0,
+      "retrieval_calls": 1,
+      "tool_calls": 0,
+      "input_tokens": 12,
+      "output_tokens": 38
+    },
+    {
+      "sample_id": "smoke_002",
+      "category": "factual",
+      "difficulty": "easy",
+      "success": true,
+      "answer": "优惠券规则：单张优惠券最大面额为500元。每日领券上限为10张。默认不允许叠加使用。",
+      "expected_answer": "单张优惠券最大面额为500元",
+      "answer_f1": 0.5853658536585366,
+      "latency_ms": 0.16300001880154014,
+      "trace_id": "trace-smoke_002",
+      "session_id": "sess-smoke_002",
+      "retrieved_source_ids": [
+        "doc_coupon_rules",
+        "doc_settlement",
+        "doc_refund_policy",
+        "doc_merchant_onboard",
+        "doc_verification"
+      ],
+      "recall_at_5": 1.0,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "error_code": null,
+      "step_outcomes": {
+        "retrieval": true,
+        "rerank": true,
+        "compression": true
+      },
+      "validation_rejected": false,
+      "auth_denied": false,
+      "circuit_opened": false,
+      "audit_entries": 0,
+      "retrieval_calls": 1,
+      "tool_calls": 0,
+      "input_tokens": 12,
+      "output_tokens": 35
+    },
+    {
+      "sample_id": "smoke_003",
+      "category": "procedural",
+      "difficulty": "medium",
+      "success": true,
+      "answer": "商户结算提现流程：进入商户端，点击财务管理，选择提现申请，填写金额，提交审核，1到3个工作日到账。",
+      "expected_answer": "进入商户端→财务管理→提现申请→填写金额→提交审核→1-3个工作日到账",
+      "answer_f1": 0.8750000000000001,
+      "latency_ms": 0.1375000283587724,
+      "trace_id": "trace-smoke_003",
+      "session_id": "sess-smoke_003",
+      "retrieved_source_ids": [
+        "doc_settlement",
+        "doc_refund_policy",
+        "doc_merchant_onboard",
+        "doc_coupon_rules",
+        "doc_verification"
+      ],
+      "recall_at_5": 1.0,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "error_code": null,
+      "step_outcomes": {
+        "retrieval": true,
+        "rerank": true,
+        "compression": true
+      },
+      "validation_rejected": false,
+      "auth_denied": false,
+      "circuit_opened": false,
+      "audit_entries": 0,
+      "retrieval_calls": 1,
+      "tool_calls": 0,
+      "input_tokens": 10,
+      "output_tokens": 42
+    },
+    {
+      "sample_id": "smoke_004",
+      "category": "negative",
+      "difficulty": "easy",
+      "success": true,
+      "answer": "[REFUSE] 该问题涉及非法行为，系统拒绝回答",
+      "expected_answer": "[REFUSE] 该问题涉及非法行为，系统拒绝回答",
+      "answer_f1": 1.0,
+      "latency_ms": 0.1230000052601099,
+      "trace_id": "trace-smoke_004",
+      "session_id": "sess-smoke_004",
+      "retrieved_source_ids": [
+        "doc_merchant_onboard",
+        "doc_settlement",
+        "doc_refund_policy",
+        "doc_verification",
+        "doc_coupon_rules"
+      ],
+      "recall_at_5": 1.0,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "error_code": null,
+      "step_outcomes": {
+        "retrieval": true,
+        "rerank": true,
+        "compression": true
+      },
+      "validation_rejected": false,
+      "auth_denied": false,
+      "circuit_opened": false,
+      "audit_entries": 0,
+      "retrieval_calls": 1,
+      "tool_calls": 0,
+      "input_tokens": 14,
+      "output_tokens": 16
+    },
+    {
+      "sample_id": "smoke_005",
+      "category": "gateway",
+      "difficulty": "easy",
+      "success": true,
+      "answer": "PASS",
+      "expected_answer": "PASS",
+      "answer_f1": 1.0,
+      "latency_ms": 0.1314000110141933,
+      "trace_id": "trace-smoke_005-a8de0a77",
+      "session_id": "sess-smoke_005",
+      "retrieved_source_ids": [],
+      "recall_at_5": 0.0,
+      "recall_at_10": 0.0,
+      "mrr": 0.0,
+      "error_code": null,
+      "step_outcomes": {
+        "validation": true,
+        "authorization": true,
+        "rate_limit": true,
+        "execution": true
+      },
+      "validation_rejected": false,
+      "auth_denied": false,
+      "circuit_opened": false,
+      "audit_entries": 2,
+      "retrieval_calls": 0,
+      "tool_calls": 1,
+      "input_tokens": 3,
+      "output_tokens": 1
+    }
+  ]
+}

@@ -7,3 +7,5 @@ agent-system/logs/*.log
 
 # OS
 .DS_Store
+.idea
+

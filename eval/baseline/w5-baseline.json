@@ -1,0 +1,16 @@
+{
+  "baseline_version": "w5",
+  "dataset_name": "smoke.jsonl",
+  "total_samples": 5,
+  "e2e_success_rate": 0.8,
+  "avg_answer_f1": 0.7809620596205963,
+  "accuracy": 0.6,
+  "p95_latency_ms": 5.0,
+  "avg_latency_ms": 1.0,
+  "cost": {
+    "total_tokens": 183,
+    "tool_calls": 1,
+    "retrieval_calls": 4
+  },
+  "notes": "Frozen W5 smoke baseline. p95 latency is rounded up to reduce CI noise."
+}
