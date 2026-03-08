@@ -1,0 +1,63 @@
+{
+  "single_agent": {
+    "status": "completed",
+    "result": "approve_refund",
+    "evidence": [
+      "refund within 30 days",
+      "receipt attached"
+    ],
+    "metrics": {
+      "role_count": 1,
+      "callback_count": 0,
+      "latency_ms": 0.000800006091594696
+    },
+    "latency_ms": 0.049799971748143435,
+    "trace_id": "trace-single-agent",
+    "session_id": "sess-single-agent"
+  },
+  "multi_agent_standard": {
+    "status": "completed",
+    "task": {
+      "task_id": "task-standard-1",
+      "callback_count": 2,
+      "all_succeeded": true,
+      "roles": [
+        "executor",
+        "auditor"
+      ]
+    },
+    "memory": {
+      "refund_status": "eligible"
+    },
+    "metrics": {
+      "role_count": 3,
+      "callback_count": 2,
+      "memory_version": 1
+    },
+    "latency_ms": 0.11750002158805728,
+    "trace_id": "trace-multi-agent-standard",
+    "session_id": "sess-multi-agent-standard"
+  },
+  "multi_agent_conflict": {
+    "status": "needs_human",
+    "selected_role": "executor",
+    "result": "approve_refund",
+    "evidence_chain": [
+      "role=executor, priority=2, confidence=0.82, evidence=refund within 30 days",
+      "role=auditor, priority=2, confidence=0.78, evidence=missing receipt attachment"
+    ],
+    "metrics": {
+      "candidate_count": 2,
+      "requires_human": true
+    },
+    "latency_ms": 0.041499966755509377,
+    "trace_id": "trace-multi-agent-conflict",
+    "session_id": "sess-multi-agent-conflict"
+  },
+  "comparison": {
+    "single_agent_role_count": 1,
+    "multi_agent_role_count": 3,
+    "multi_agent_callback_count": 2,
+    "conflict_requires_human": true
+  }
+}
