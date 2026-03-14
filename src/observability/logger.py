@@ -35,11 +35,16 @@ class StructuredLogEntry:
 
 
 class StructuredLogger:
-    """In-memory structured logger."""
+    """In-memory structured logger.
 
-    def __init__(self) -> None:
+    Optionally accepts a :class:`LogExporter` to forward entries to an
+    external backend.
+    """
+
+    def __init__(self, log_exporter: Optional[Any] = None) -> None:
         self._entries: List[StructuredLogEntry] = []
         self._lock = threading.Lock()
+        self._exporter = log_exporter
 
     def info(
         self,
@@ -124,3 +129,5 @@ class StructuredLogger:
         )
         with self._lock:
             self._entries.append(entry)
+        if self._exporter is not None:
+            self._exporter.export([entry.to_dict()])

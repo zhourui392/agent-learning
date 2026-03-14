@@ -4,7 +4,7 @@
 
 本仓库用于按周推进 Agent 工程化落地，目标是从基础执行框架逐步演进到具备评测、观测、多 Agent 协作与上线治理能力的可交付系统。
 
-当前仓库已经完成 `W1-W9` 的主要产物，覆盖：
+当前仓库已经完成 `W1-W10` 的主要产物，覆盖：
 - 工作流执行内核
 - RAG 检索与上下文压缩
 - Gateway 治理与安全控制
@@ -13,8 +13,9 @@
 - 多 Agent 协作骨架与 Demo
 - 上线治理、灰度、回滚与 Runbook
 - 生产化持久化层与统一配置中心
+- 分布式消息总线、任务队列、可观测性导出与 Redis 后端
 
-## 当前完成进度（截至 2026-03-13）
+## 当前完成进度（截至 2026-03-14）
 
 ### W1：基础执行框架
 - 建立基础目录结构与工程骨架
@@ -68,6 +69,17 @@
 - StateTracker 提供全系统状态单一视图
 - 迁移脚本：init_default_config / export_config / import_config
 
+### W10：分布式架构与基础设施接入
+- 消息总线抽象（MessageBus ABC + InMemory + Redis 双实现，publish/subscribe/request-reply）
+- 分布式任务队列（TaskQueue ABC + DistributedLock ABC，enqueue/dequeue/ack/nack/dead-letter）
+- 可观测性导出后端（MetricsExporter + LogExporter + TraceExporter，InMemory/Prometheus/JSON/OTLP 4 实现）
+- 持久化 Redis 后端（RedisSharedMemoryBackend + RedisCircuitStateBackend）
+- 连接池抽象与压缩序列化工具
+- TaskDispatcher 集成 MessageBus 事件广播
+- Tracer / StructuredLogger 注入 Exporter 转发
+- 端到端管线集成测试与多实例模拟
+- 性能基准（消息吞吐、队列吞吐、Redis 读写）
+
 ## 仓库结构
 
 - `plans/`：总体学习规划、每周方案与分周执行清单
@@ -77,8 +89,11 @@
   - `src/observability/`：Trace、日志、告警、看板、演练
   - `src/multi_agent/`：多 Agent 协议、分派、仲裁、共享记忆、Demo 评测
   - `src/release/`：A/B 路由、实验止损、发布治理辅助模块
-  - `src/persistence/`：持久化抽象层、SQLite 后端、实例注册、状态恢复
+  - `src/persistence/`：持久化抽象层、SQLite/Redis 后端、实例注册、状态恢复、连接池
   - `src/config_center/`：统一配置中心、watch/notify、版本管理
+  - `src/messaging/`：消息总线抽象、InMemory/Redis 实现
+  - `src/scheduler/`：分布式任务队列与锁抽象、InMemory/Redis 实现
+  - `src/observability/exporters/`：Metrics/Log/Trace 导出后端
 - `contracts/`：协议与契约文件
 - `eval/`：评测数据集、评测器、报告模板、结果产物
 - `docs/`：交接、评审、可观测性、安全、治理、多 Agent 文档
@@ -130,6 +145,18 @@
 - `docs/architecture/persistence-layer.md`
 - `docs/architecture/config-center.md`
 - `docs/ops/state-recovery.md`
+
+### 分布式基础设施（W10）
+- `src/messaging/interfaces.py` -- MessageBus ABC
+- `src/messaging/in_memory_bus.py` / `redis_bus.py` -- 双实现
+- `src/scheduler/interfaces.py` -- TaskQueue + DistributedLock ABC
+- `src/scheduler/in_memory_queue.py` / `redis_queue.py` -- 双实现
+- `src/observability/exporters/` -- Metrics/Log/Trace 导出器
+- `src/persistence/redis_backend.py` -- Redis 持久化后端
+- `src/persistence/connection_pool.py` -- 连接池
+- `docs/architecture/distributed-layer.md`
+- `docs/ops/distributed-deployment.md`
+- `docs/ops/distributed-drill.md`
 
 ## 本地运行
 
@@ -206,17 +233,17 @@ print(summary)
 
 ## 当前边界与限制
 
-- W9 持久化层采用 SQLite 单进程方案，尚未接入分布式存储
-- 多 Agent 协作仍是仓库内最小可运行骨架，未接入真实消息总线 / 任务队列
+- 分布式组件使用 fakeredis + threading 模拟，尚未接入真实 Redis / RabbitMQ
+- 可观测性导出器实现了 Prometheus / OTLP 格式，但尚未对接真实后端
 - 评测基线当前以 `smoke` 数据集为主，覆盖面仍可继续扩展
-- 可观测性与告警目前主要服务于本地评测和演练链路
+- 多 Agent 协作已支持消息总线通信，但仍为单进程多线程模拟
 
 ## 下一步方向
 
-- 进入 `W10`：分布式架构与真实基础设施接入
-- 接入真实消息总线、任务队列与观测后端
-- 将 SQLite 后端扩展为分布式存储方案
-- 提升自动回放、自动演练与错误预算治理能力
+- 进入 `W11`：自动化治理与运营闭环
+- 支持自动回放、自动演练与错误预算治理
+- 接入真实基础设施（Redis / Prometheus / OTLP Collector）
+- 运营控制台与周报自动生成
 
 ## 分周索引
 
@@ -229,3 +256,4 @@ print(summary)
 - `plans/W7-执行清单.md`
 - `plans/W8-执行清单.md`
 - `plans/W9-执行清单.md`
+- `plans/W10-执行清单.md`

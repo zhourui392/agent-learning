@@ -4,7 +4,10 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
+
+if TYPE_CHECKING:
+    from src.messaging.interfaces import MessageBus
 
 
 @dataclass
@@ -23,10 +26,14 @@ class TaskAssignment:
 
 
 class TaskDispatcher:
-    """In-memory role-based task dispatcher."""
+    """In-memory role-based task dispatcher.
 
-    def __init__(self) -> None:
+    Optionally accepts a :class:`MessageBus` to broadcast lifecycle events.
+    """
+
+    def __init__(self, message_bus: Optional["MessageBus"] = None) -> None:
         self._assignments: Dict[str, TaskAssignment] = {}
+        self._bus = message_bus
 
     def enqueue(self, assignment: TaskAssignment) -> TaskAssignment:
         """Register one task assignment."""
@@ -34,6 +41,12 @@ class TaskDispatcher:
         if assignment.task_id in self._assignments:
             raise ValueError(f"task '{assignment.task_id}' already exists")
         self._assignments[assignment.task_id] = assignment
+        if self._bus is not None:
+            self._bus.publish(
+                topic=f"task.assigned.{assignment.role}",
+                payload={"task_id": assignment.task_id, "role": assignment.role},
+                sender_id="dispatcher",
+            )
         return assignment
 
     def dispatch_next(self, role: str) -> Optional[TaskAssignment]:
@@ -58,6 +71,12 @@ class TaskDispatcher:
         assignment = self._get_assignment(task_id)
         assignment.status = "completed" if succeeded else "failed"
         assignment.updated_at = time.time()
+        if self._bus is not None:
+            self._bus.publish(
+                topic="task.completed",
+                payload={"task_id": task_id, "succeeded": succeeded},
+                sender_id="dispatcher",
+            )
         return assignment
 
     def recycle_timed_out(self, now: Optional[float] = None) -> List[TaskAssignment]:

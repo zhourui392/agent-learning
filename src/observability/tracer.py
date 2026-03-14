@@ -113,11 +113,16 @@ class SpanScope:
 
 
 class Tracer:
-    """In-memory tracer used by the evaluation runner."""
+    """In-memory tracer used by the evaluation runner.
 
-    def __init__(self) -> None:
+    Optionally accepts a :class:`TraceExporter` to forward spans to an
+    external backend.
+    """
+
+    def __init__(self, trace_exporter: Optional[Any] = None) -> None:
         self._spans: List[SpanRecord] = []
         self._lock = threading.Lock()
+        self._exporter = trace_exporter
 
     def start_span(
         self,
@@ -136,6 +141,8 @@ class Tracer:
 
         with self._lock:
             self._spans.append(span_record)
+        if self._exporter is not None:
+            self._exporter.export_spans([span_record.to_dict()])
 
     def list_spans(self) -> List[SpanRecord]:
         """Return a snapshot of collected spans."""
