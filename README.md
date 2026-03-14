@@ -4,15 +4,17 @@
 
 本仓库用于按周推进 Agent 工程化落地，目标是从基础执行框架逐步演进到具备评测、观测、多 Agent 协作与上线治理能力的可交付系统。
 
-当前仓库已经完成 `W1-W7` 的主要产物，覆盖：
+当前仓库已经完成 `W1-W9` 的主要产物，覆盖：
 - 工作流执行内核
 - RAG 检索与上下文压缩
 - Gateway 治理与安全控制
 - 自动化评测与 CI 门禁
 - 可观测性与告警体系
 - 多 Agent 协作骨架与 Demo
+- 上线治理、灰度、回滚与 Runbook
+- 生产化持久化层与统一配置中心
 
-## 当前完成进度（截至 2026-03-08）
+## 当前完成进度（截至 2026-03-13）
 
 ### W1：基础执行框架
 - 建立基础目录结构与工程骨架
@@ -51,6 +53,21 @@
 - 产出标准流程 / 冲突流程 Demo
 - 实现单 Agent vs 多 Agent 对比评测
 
+### W8：上线与治理
+- 补齐灰度、A/B、回滚、SLA/SLO、告警升级与 Runbook
+- 实现稳定分桶与实验止损路由器
+- 输出容量评估、预发演练、上线复盘与下一阶段路线图
+
+### W9：生产化状态与配置中心
+- 建立持久化抽象层（4 个 Backend ABC + InMemory / SQLite 双实现）
+- SQLite 单库多表，WAL 模式，SchemaManager 幂等建表
+- 统一配置中心（命名空间、版本自增、watch/notify 变更推送）
+- SharedMemoryStore / CircuitBreaker 注入后端，状态可跨实例恢复
+- AlertManager / AbRouter 支持从 ConfigCenter 动态加载规则与实验配置
+- InstanceRegistry 心跳检测 + CrossInstanceRecovery 孤儿会话恢复
+- StateTracker 提供全系统状态单一视图
+- 迁移脚本：init_default_config / export_config / import_config
+
 ## 仓库结构
 
 - `plans/`：总体学习规划、每周方案与分周执行清单
@@ -59,12 +76,15 @@
   - `src/rag/`：检索、重排、上下文压缩
   - `src/observability/`：Trace、日志、告警、看板、演练
   - `src/multi_agent/`：多 Agent 协议、分派、仲裁、共享记忆、Demo 评测
+  - `src/release/`：A/B 路由、实验止损、发布治理辅助模块
+  - `src/persistence/`：持久化抽象层、SQLite 后端、实例注册、状态恢复
+  - `src/config_center/`：统一配置中心、watch/notify、版本管理
 - `contracts/`：协议与契约文件
 - `eval/`：评测数据集、评测器、报告模板、结果产物
 - `docs/`：交接、评审、可观测性、安全、治理、多 Agent 文档
 - `demo/`：多 Agent 业务 Demo 说明
 - `tests/`：单元测试与集成测试
-- `scripts/`：辅助脚本，如失败样本回放
+- `scripts/`：辅助脚本（失败样本回放、配置初始化/导出/导入）
 - `observability/`：看板配置
 
 ## 当前重点产物
@@ -90,6 +110,26 @@
 - `src/multi_agent/arbitrator.py`
 - `src/multi_agent/shared_memory.py`
 - `src/multi_agent/evaluator.py`
+
+### 发布治理相关
+- `src/release/ab_router.py`
+- `docs/release/gray-release-plan.md`
+- `docs/release/rollback-policy.md`
+- `docs/release/ab-experiment-spec.md`
+- `docs/ops/sla-slo.md`
+- `docs/runbook/incident-handling.md`
+
+### 持久化与配置中心（W9）
+- `src/persistence/interfaces.py` -- 4 个 Backend ABC
+- `src/persistence/sqlite_backend.py` -- SQLite 实现
+- `src/persistence/schema.py` -- 幂等 Schema 管理
+- `src/persistence/instance_registry.py` -- 实例心跳
+- `src/persistence/recovery.py` -- 跨实例恢复
+- `src/persistence/state_tracker.py` -- 全局状态视图
+- `src/config_center/config_store.py` -- 配置中心
+- `docs/architecture/persistence-layer.md`
+- `docs/architecture/config-center.md`
+- `docs/ops/state-recovery.md`
 
 ## 本地运行
 
@@ -117,7 +157,15 @@ bash scripts/replay_failed_case.sh \
   --case-id smoke_001
 ```
 
-### 4. 运行 W7 多 Agent 对比评测
+### 4. 初始化 W9 配置数据库
+
+```bash
+python scripts/init_default_config.py --db state.db
+python scripts/export_config.py --db state.db --output config_backup.json
+python scripts/import_config.py --db state.db --input config_backup.json
+```
+
+### 5. 运行 W7 多 Agent 对比评测
 
 ```bash
 @'
@@ -148,19 +196,27 @@ print(summary)
 - `eval/results/w7-multi-agent/traces.jsonl`
 - `eval/results/w7-multi-agent/logs.jsonl`
 
+### W8 治理输出
+- `docs/release/gray-release-plan.md`
+- `docs/release/pre-prod-drill.md`
+- `docs/reports/w8-capacity-report.md`
+- `docs/reports/w8-drill-issues.md`
+- `docs/reports/w8-launch-review.md`
+- `docs/roadmap/next-phase.md`
+
 ## 当前边界与限制
 
-- 当前多 Agent、观测、评测能力以本地内存实现为主，尚未接入真实持久化后端
+- W9 持久化层采用 SQLite 单进程方案，尚未接入分布式存储
 - 多 Agent 协作仍是仓库内最小可运行骨架，未接入真实消息总线 / 任务队列
 - 评测基线当前以 `smoke` 数据集为主，覆盖面仍可继续扩展
 - 可观测性与告警目前主要服务于本地评测和演练链路
 
 ## 下一步方向
 
-- 进入 `W8`：上线与治理
-- 将多 Agent 能力接入发布、灰度、回滚与运行治理
-- 把共享记忆、状态与观测产物迁移到更接近生产的持久化方案
-- 完善发布 Runbook、灰度策略、容量评估与上线复盘
+- 进入 `W10`：分布式架构与真实基础设施接入
+- 接入真实消息总线、任务队列与观测后端
+- 将 SQLite 后端扩展为分布式存储方案
+- 提升自动回放、自动演练与错误预算治理能力
 
 ## 分周索引
 
@@ -172,3 +228,4 @@ print(summary)
 - `plans/W6-执行清单.md`
 - `plans/W7-执行清单.md`
 - `plans/W8-执行清单.md`
+- `plans/W9-执行清单.md`

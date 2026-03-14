@@ -1,11 +1,18 @@
-"""Alert rule evaluation helpers for W6."""
+"""Alert rule evaluation helpers for W6.
+
+W9 update: ``AlertManager`` can optionally load rules from a ``ConfigCenter``
+via ``from_config_center()``, falling back to hardcoded defaults.
+"""
 
 from __future__ import annotations
 
 import json
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from src.config_center.config_store import ConfigCenter
 
 
 @dataclass(frozen=True)
@@ -40,57 +47,94 @@ class AlertEvent:
         return asdict(self)
 
 
-class AlertManager:
-    """Evaluate summaries against W6 alert rules."""
+_DEFAULT_RULES = [
+    AlertRule(
+        name="low_e2e_success_rate",
+        severity="P1",
+        metric="e2e_success_rate",
+        threshold=0.75,
+        comparator="lt",
+        route="oncall+owner+war-room",
+        description="E2E success rate drops below SLO.",
+    ),
+    AlertRule(
+        name="high_p95_latency",
+        severity="P2",
+        metric="p95_latency_ms",
+        threshold=7.5,
+        comparator="gt",
+        route="owner+team-channel",
+        description="P95 latency exceeds smoke baseline tolerance.",
+    ),
+    AlertRule(
+        name="tool_execution_failures",
+        severity="P1",
+        metric="failure_buckets.tool_execution_failed",
+        threshold=1.0,
+        comparator="ge",
+        route="oncall+owner+war-room",
+        description="Tool execution failures detected.",
+    ),
+    AlertRule(
+        name="rate_limited_burst",
+        severity="P2",
+        metric="failure_buckets.rate_limited",
+        threshold=5.0,
+        comparator="ge",
+        route="owner+team-channel",
+        description="Rate limited events exceed expected noise level.",
+    ),
+    AlertRule(
+        name="token_cost_spike",
+        severity="P2",
+        metric="cost.total_tokens",
+        threshold=240.0,
+        comparator="gt",
+        route="owner+team-channel",
+        description="Token cost exceeds smoke control threshold.",
+    ),
+]
 
-    def __init__(self) -> None:
-        self._rules = [
-            AlertRule(
-                name="low_e2e_success_rate",
-                severity="P1",
-                metric="e2e_success_rate",
-                threshold=0.75,
-                comparator="lt",
-                route="oncall+owner+war-room",
-                description="E2E success rate drops below SLO.",
-            ),
-            AlertRule(
-                name="high_p95_latency",
-                severity="P2",
-                metric="p95_latency_ms",
-                threshold=7.5,
-                comparator="gt",
-                route="owner+team-channel",
-                description="P95 latency exceeds smoke baseline tolerance.",
-            ),
-            AlertRule(
-                name="tool_execution_failures",
-                severity="P1",
-                metric="failure_buckets.tool_execution_failed",
-                threshold=1.0,
-                comparator="ge",
-                route="oncall+owner+war-room",
-                description="Tool execution failures detected.",
-            ),
-            AlertRule(
-                name="rate_limited_burst",
-                severity="P2",
-                metric="failure_buckets.rate_limited",
-                threshold=5.0,
-                comparator="ge",
-                route="owner+team-channel",
-                description="Rate limited events exceed expected noise level.",
-            ),
-            AlertRule(
-                name="token_cost_spike",
-                severity="P2",
-                metric="cost.total_tokens",
-                threshold=240.0,
-                comparator="gt",
-                route="owner+team-channel",
-                description="Token cost exceeds smoke control threshold.",
-            ),
-        ]
+
+class AlertManager:
+    """Evaluate summaries against alert rules.
+
+    Parameters
+    ----------
+    rules : list[AlertRule], optional
+        Custom rule set.  Defaults to the built-in W6 rules.
+    """
+
+    def __init__(self, rules: Optional[List[AlertRule]] = None) -> None:
+        self._rules = list(rules) if rules is not None else list(_DEFAULT_RULES)
+
+    @classmethod
+    def from_config_center(
+        cls,
+        config_center: "ConfigCenter",
+        namespace: str = "alert_rules",
+    ) -> "AlertManager":
+        """Create an AlertManager whose rules come from ConfigCenter.
+
+        Each config entry in *namespace* is expected to have a dict value with
+        keys: name, severity, metric, threshold, comparator, route, description.
+        """
+        entries = config_center.list_namespace(namespace)
+        rules: List[AlertRule] = []
+        for entry in entries:
+            v = entry.value
+            rules.append(AlertRule(
+                name=v["name"],
+                severity=v["severity"],
+                metric=v["metric"],
+                threshold=float(v["threshold"]),
+                comparator=v["comparator"],
+                route=v["route"],
+                description=v.get("description", ""),
+            ))
+        if not rules:
+            return cls()
+        return cls(rules=rules)
 
     def evaluate(self, summary: Dict[str, Any]) -> List[AlertEvent]:
         """Evaluate all rules against one summary."""
