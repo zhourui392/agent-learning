@@ -4,7 +4,7 @@
 
 本仓库用于按周推进 Agent 工程化落地，目标是从基础执行框架逐步演进到具备评测、观测、多 Agent 协作与上线治理能力的可交付系统。
 
-当前仓库已经完成 `W1-W10` 的主要产物，覆盖：
+当前仓库已经完成 `W1-W11` 的主要产物，覆盖：
 - 工作流执行内核
 - RAG 检索与上下文压缩
 - Gateway 治理与安全控制
@@ -14,8 +14,9 @@
 - 上线治理、灰度、回滚与 Runbook
 - 生产化持久化层与统一配置中心
 - 分布式消息总线、任务队列、可观测性导出与 Redis 后端
+- 自动化治理闭环：流量回放、混沌注入、业务评估、门禁决策、运营报告
 
-## 当前完成进度（截至 2026-03-14）
+## 当前完成进度（截至 2026-03-17）
 
 ### W1：基础执行框架
 - 建立基础目录结构与工程骨架
@@ -80,6 +81,16 @@
 - 端到端管线集成测试与多实例模拟
 - 性能基准（消息吞吐、队列吞吐、Redis 读写）
 
+### W11：自动化治理与运营闭环
+- 脱敏流量回放体系（TrafficAnonymizer + ReplayEngine + ReplayScheduler）
+- 混沌注入框架（ChaosInjector + ResilienceScorer，4 种故障类型）
+- 业务指标评估器（BusinessEvaluator + ErrorBudgetTracker，技术+业务复合评分）
+- 自动化回归管线（RegressionPipeline 五步编排：replay → ab_route → evaluate → chaos → gate）
+- 门禁决策函数（GateFunction：P1 告警 / 评分 / 预算三重门禁）
+- 运营周报生成（TrendAnalyzer 回归/改进检测 + WeeklyReportGenerator Markdown 输出）
+- 全组件通过 ConfigCenter 动态配置，MessageBus 事件广播
+- 75 单元测试 + 7 集成测试 + 3 性能基准
+
 ## 仓库结构
 
 - `plans/`：总体学习规划、每周方案与分周执行清单
@@ -94,6 +105,11 @@
   - `src/messaging/`：消息总线抽象、InMemory/Redis 实现
   - `src/scheduler/`：分布式任务队列与锁抽象、InMemory/Redis 实现
   - `src/observability/exporters/`：Metrics/Log/Trace 导出后端
+  - `src/evaluation/`：业务指标评估、错误预算追踪
+  - `src/replay/`：流量回放引擎、脱敏、调度
+  - `src/chaos/`：混沌注入框架、韧性评分
+  - `src/automation/`：自动化回归管线、门禁决策
+  - `src/ops_report/`：趋势分析、运营周报生成
 - `contracts/`：协议与契约文件
 - `eval/`：评测数据集、评测器、报告模板、结果产物
 - `docs/`：交接、评审、可观测性、安全、治理、多 Agent 文档
@@ -231,6 +247,16 @@ print(summary)
 - `docs/reports/w8-launch-review.md`
 - `docs/roadmap/next-phase.md`
 
+### 自动化治理闭环（W11）
+- `src/evaluation/` -- BusinessEvaluator + ErrorBudgetTracker
+- `src/replay/` -- TrafficAnonymizer + ReplayEngine + ReplayScheduler
+- `src/chaos/` -- ChaosInjector + ResilienceScorer
+- `src/automation/` -- RegressionPipeline + GateFunction
+- `src/ops_report/` -- TrendAnalyzer + WeeklyReportGenerator
+- `docs/architecture/automated-governance.md`
+- `docs/ops/replay-guide.md`
+- `docs/ops/chaos-drill.md`
+
 ## 当前边界与限制
 
 - 分布式组件使用 fakeredis + threading 模拟，尚未接入真实 Redis / RabbitMQ
@@ -240,10 +266,10 @@ print(summary)
 
 ## 下一步方向
 
-- 进入 `W11`：自动化治理与运营闭环
-- 支持自动回放、自动演练与错误预算治理
-- 接入真实基础设施（Redis / Prometheus / OTLP Collector）
-- 运营控制台与周报自动生成
+- 进入 `W12`：真实基础设施对接与生产验证
+- 接入真实 Redis / Prometheus / OTLP Collector
+- 运营控制台 Web UI
+- 多集群部署与跨区域容灾
 
 ## 分周索引
 
@@ -257,3 +283,4 @@ print(summary)
 - `plans/W8-执行清单.md`
 - `plans/W9-执行清单.md`
 - `plans/W10-执行清单.md`
+- `plans/W11-执行清单.md`

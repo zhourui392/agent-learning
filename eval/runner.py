@@ -618,6 +618,7 @@ class EvaluationRunner:
                     "latency_ms": case_result.latency_ms,
                     "step_outcomes": case_result.step_outcomes,
                     "sample": asdict(sample),
+                    "captured_at": time.time(),
                 }
                 json.dump(record, file_handle, ensure_ascii=False)
                 file_handle.write("\n")
